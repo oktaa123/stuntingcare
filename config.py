@@ -1,4 +1,6 @@
-import os
+from config import Config
+import joblib
+import numpy as np
 
 class Config:
     SECRET_KEY = "stuntingcare_secret_key"

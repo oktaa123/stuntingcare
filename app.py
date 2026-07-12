@@ -23,11 +23,16 @@ FEATURE_CONTRIBUTIONS = [
 ]
 
 FORM_FIELDS = (
-    "child_name", "gender", "age", "birth_weight", "birth_length",
-    "current_weight", "current_height", "exclusive_breastfeeding",
-    "immunization_status", "infection_history",
+    "child_name",
+    "birth_weight",
+    "bbu",
+    "zscore",
+    "merokok",
+    "jkn",
+    "riwayat_posyandu",
+    "status_keluarga",
+    "pola_asuh",
 )
-
 
 def validate_number(value: str, label: str, minimum: float, maximum: float, errors: list[str]) -> None:
     try:
@@ -101,12 +106,21 @@ def prediction():
         form_data = {field: request.form.get(field, "").strip() for field in FORM_FIELDS}
         if not form_data["child_name"]:
             errors.append("Nama balita wajib diisi.")
-        for field, label in (
-            ("gender", "Jenis kelamin"),
-            ("exclusive_breastfeeding", "ASI eksklusif"),
-            ("immunization_status", "Status imunisasi"),
-            ("infection_history", "Riwayat penyakit infeksi"),
-        ):
+            required_fields = [
+    "birth_weight",
+    "bbu",
+    "zscore",
+    "merokok",
+    "jkn",
+    "riwayat_posyandu",
+    "status_keluarga",
+    "pola_asuh",
+]
+
+for field in required_fields:
+    if form_data[field] == "":
+        errors.append(f"{field} wajib diisi.")
+     
             if not form_data[field]:
                 errors.append(f"{label} wajib dipilih.")
         for field, label, minimum, maximum in (
@@ -116,7 +130,9 @@ def prediction():
             ("current_weight", "Berat badan saat ini", 1, 35),
             ("current_height", "Tinggi badan saat ini", 35, 130),
         ):
-            validate_number(form_data[field], label, minimum, maximum, errors)
+            vvalidate_number(form_data["birth_weight"], "BB Lahir", 500, 6000, errors)
+validate_number(form_data["bbu"], "BB/U", -10, 5, errors)
+validate_number(form_data["zscore"], "Z Score BB/TB", -10, 5, errors)
         if not errors:
             session["prediction_result"] = predict_risk(form_data)
             return redirect(url_for("result"))

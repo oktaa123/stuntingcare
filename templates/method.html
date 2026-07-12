@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="page-shell method-page">
+    <div class="container">
+        <div class="page-heading method-heading reveal">
+            <span class="section-kicker">METODE PENELITIAN</span>
+            <h1>Teknologi yang bekerja di balik skrining.</h1>
+            <p>StuntingCare menggunakan rangkaian proses machine learning yang terukur, mulai dari pengolahan data hingga evaluasi performa model.</p>
+        </div>
+
+        <div class="method-pipeline reveal" aria-label="Pipeline penelitian">
+            {% set pipeline = [
+                ('bi-database', 'Dataset', '349 data'),
+                ('bi-sliders', 'Preprocessing', 'Persiapan data'),
+                ('bi-filter-circle', 'Mutual Information', 'Seleksi fitur'),
+                ('bi-tree', 'Random Forest', 'Klasifikasi'),
+                ('bi-toggles', 'Optuna', 'Optimasi'),
+                ('bi-clipboard2-data', 'Model Evaluation', 'Pengujian model')
+            ] %}
+            {% for icon, title, note in pipeline %}
+            <article class="method-step">
+                <span><i class="bi {{ icon }}" aria-hidden="true"></i></span>
+                <strong>{{ title }}</strong><small>{{ note }}</small>
+            </article>
+            {% if not loop.last %}<i class="bi bi-arrow-right method-arrow" aria-hidden="true"></i>{% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="method-explain-grid">
+            <article class="method-info-card reveal">
+                <span class="method-card-icon"><i class="bi bi-filter-circle" aria-hidden="true"></i></span>
+                <small>SELEKSI FITUR</small><h2>Mutual Information</h2>
+                <p>Mengukur seberapa besar informasi setiap variabel terhadap hasil klasifikasi. Proses ini memilih delapan fitur yang paling relevan agar model tetap ringkas dan informatif.</p>
+                <div class="mini-bars" aria-hidden="true"><i style="height:48%"></i><i style="height:64%"></i><i style="height:82%"></i><i style="height:70%"></i><i style="height:94%"></i><i style="height:58%"></i><i style="height:74%"></i><i style="height:52%"></i></div>
+            </article>
+            <article class="method-info-card reveal">
+                <span class="method-card-icon"><i class="bi bi-tree" aria-hidden="true"></i></span>
+                <small>MODEL KLASIFIKASI</small><h2>Random Forest</h2>
+                <p>Menggabungkan banyak pohon keputusan untuk menghasilkan prediksi yang lebih stabil dan mengurangi kemungkinan model terlalu menyesuaikan diri dengan data pelatihan.</p>
+                <div class="model-chips"><span><i class="bi bi-diagram-3" aria-hidden="true"></i> Decision Trees</span><span><i class="bi bi-layers" aria-hidden="true"></i> Ensemble</span></div>
+            </article>
+            <article class="method-info-card reveal">
+                <span class="method-card-icon"><i class="bi bi-toggles" aria-hidden="true"></i></span>
+                <small>OPTIMASI MODEL</small><h2>Optuna</h2>
+                <p>Mencari kombinasi hyperparameter yang paling baik secara sistematis sehingga konfigurasi Random Forest dapat memberikan performa evaluasi yang optimal.</p>
+                <div class="optimization-visual"><i class="bi bi-bullseye" aria-hidden="true"></i><span><strong>Optimal</strong><small>Hyperparameter search</small></span></div>
+            </article>
+        </div>
+    </div>
+
+    <section class="evaluation-section" aria-labelledby="performance-title">
+        <div class="container">
+            <div class="section-heading reveal">
+                <span class="section-kicker">PERFORMA PENELITIAN</span>
+                <h2 id="performance-title">Evaluasi model yang terukur.</h2>
+                <p>Lima metrik utama digunakan untuk melihat performa klasifikasi secara menyeluruh.</p>
+            </div>
+            <div class="performance-grid">
+                {% set metrics = [
+                    ('Accuracy', '92.86%', 'bi-bullseye', '92.86'),
+                    ('Precision', '0.93', 'bi-check2-circle', '93'),
+                    ('Recall', '0.91', 'bi-arrow-repeat', '91'),
+                    ('F1-score', '0.92', 'bi-intersect', '92'),
+                    ('ROC-AUC', '0.9017', 'bi-graph-up-arrow', '90.17')
+                ] %}
+                {% for label, value, icon, width in metrics %}
+                <article class="performance-card reveal"><span><i class="bi {{ icon }}" aria-hidden="true"></i></span><small>{{ label }}</small><strong>{{ value }}</strong><i><b style="width: {{ width }}%"></b></i></article>
+                {% endfor %}
+            </div>
+
+            <div class="evaluation-grid">
+                <article class="evaluation-card reveal">
+                    <div class="evaluation-card-heading"><div><span class="section-kicker">CONFUSION MATRIX</span><h3>Distribusi hasil klasifikasi</h3></div><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></div>
+                    <div class="matrix-wrap">
+                        <div class="matrix" role="img" aria-label="Confusion Matrix: aktual stunting diprediksi stunting 138 dan normal 10; aktual normal diprediksi stunting 16 dan normal 185">
+                            <span></span><small>Pred. Berisiko</small><small>Pred. Rendah</small>
+                            <small>Akt. Berisiko</small><strong class="matrix-good">138</strong><strong class="matrix-soft">10</strong>
+                            <small>Akt. Rendah</small><strong class="matrix-soft">16</strong><strong class="matrix-good">185</strong>
+                        </div>
+                    </div>
+                    <p class="evaluation-note"><i class="bi bi-info-circle" aria-hidden="true"></i> Angka diagonal menunjukkan klasifikasi yang tepat.</p>
+                </article>
+
+                <article class="evaluation-card reveal">
+                    <div class="evaluation-card-heading"><div><span class="section-kicker">ROC CURVE</span><h3>Kemampuan membedakan kelas</h3></div><span class="auc-pill">AUC 0.9017</span></div>
+                    <div class="roc-chart">
+                        <span class="axis-y">True Positive Rate</span><span class="axis-x">False Positive Rate</span>
+                        <svg viewBox="0 0 520 250" role="img" aria-label="Kurva ROC dengan area under curve 0.9017">
+                            <line x1="18" y1="230" x2="500" y2="18" class="roc-baseline" />
+                            <path d="M18 230 C30 140 55 88 105 60 C165 28 275 19 500 18" class="roc-line" />
+                            <path d="M18 230 C30 140 55 88 105 60 C165 28 275 19 500 18 L500 230 Z" class="roc-area" />
+                        </svg>
+                    </div>
+                    <p class="evaluation-note"><i class="bi bi-info-circle" aria-hidden="true"></i> Nilai yang mendekati 1 menunjukkan kemampuan klasifikasi yang semakin baik.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+</section>
+{% endblock %}

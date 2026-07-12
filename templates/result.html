@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="page-shell result-page">
+    <div class="container">
+        <ol class="screening-steps result-stepper reveal" aria-label="Tahapan skrining">
+            <li class="complete"><span><i class="bi bi-check" aria-hidden="true"></i></span><div><strong>Data Anak</strong><small>Sudah lengkap</small></div></li>
+            <li class="step-line complete" aria-hidden="true"></li>
+            <li class="complete"><span><i class="bi bi-check" aria-hidden="true"></i></span><div><strong>Analisis</strong><small>Sudah diproses</small></div></li>
+            <li class="step-line complete" aria-hidden="true"></li>
+            <li class="active" aria-current="step"><span>3</span><div><strong>Hasil</strong><small>Rekomendasi Anda</small></div></li>
+        </ol>
+
+        <div class="result-heading reveal">
+            <span class="section-kicker">HASIL SKRINING</span>
+            <h1>Hasil skrining awal {{ result.child_name }}</h1>
+            <p>Data telah dianalisis pada {{ result.recorded_at }}.</p>
+        </div>
+
+        <article class="result-summary {{ 'needs-attention' if result.positive else 'low-risk' }} reveal" aria-labelledby="screening-status">
+            <div class="result-copy">
+                <span class="result-badge"><i class="bi {{ 'bi-heart-pulse' if result.positive else 'bi-shield-check' }}" aria-hidden="true"></i> {{ 'Tindak lanjut disarankan' if result.positive else 'Pertumbuhan tetap dipantau' }}</span>
+                <h2 id="screening-status">{{ 'Risiko Stunting' if result.positive else 'Risiko Rendah' }}</h2>
+                <p>
+                    {% if result.positive %}
+                    Hasil menunjukkan adanya kemungkinan risiko stunting yang memerlukan perhatian. Tetap tenang—hasil ini dapat menjadi langkah awal untuk berkonsultasi dan memperoleh pendampingan yang tepat.
+                    {% else %}
+                    Hasil menunjukkan kemungkinan risiko stunting yang rendah. Pertahankan kebiasaan baik dan lanjutkan pemantauan pertumbuhan anak secara rutin.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="result-score" aria-label="Probabilitas risiko {{ result.probability }} persen">
+                <div class="score-number"><strong>{{ result.probability }}%</strong><span>Probabilitas risiko</span></div>
+                <div class="probability-track" role="progressbar" aria-valuenow="{{ result.probability }}" aria-valuemin="0" aria-valuemax="100" aria-label="Probabilitas risiko">
+                    <i style="width: {{ result.probability }}%"></i>
+                </div>
+                <div class="probability-labels"><span>Rendah</span><span>Memerlukan perhatian</span></div>
+            </div>
+        </article>
+
+        <div class="result-grid">
+            <article class="content-card interpretation-card reveal">
+                <div class="content-card-heading"><span><i class="bi bi-chat-heart" aria-hidden="true"></i></span><div><small>INTERPRETASI</small><h3>Apa arti hasil ini?</h3></div></div>
+                <p>
+                    {% if result.positive %}
+                    Beberapa data pertumbuhan dan riwayat kesehatan anak menunjukkan pola yang berkaitan dengan risiko stunting. Hasil ini bukan kepastian bahwa anak mengalami stunting, tetapi pemeriksaan lebih lanjut oleh tenaga kesehatan disarankan.
+                    {% else %}
+                    Data yang dimasukkan menunjukkan pola pertumbuhan dengan risiko stunting yang lebih rendah. Pemantauan rutin tetap penting karena tumbuh kembang anak dapat berubah dari waktu ke waktu.
+                    {% endif %}
+                </p>
+                <div class="disclaimer" role="note">
+                    <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+                    <span>Hasil ini merupakan skrining awal menggunakan model machine learning dan bukan diagnosis medis. Untuk memastikan kondisi anak, konsultasikan dengan tenaga kesehatan.</span>
+                </div>
+            </article>
+
+            <article class="content-card recommendation-card reveal">
+                <div class="content-card-heading"><span><i class="bi bi-clipboard2-heart" aria-hidden="true"></i></span><div><small>REKOMENDASI</small><h3>Langkah baik selanjutnya</h3></div></div>
+                <ul>
+                    <li><i class="bi bi-check" aria-hidden="true"></i><span>Pantau pertumbuhan rutin</span></li>
+                    <li><i class="bi bi-check" aria-hidden="true"></i><span>Perbaiki asupan gizi</span></li>
+                    <li><i class="bi bi-check" aria-hidden="true"></i><span>Lengkapi imunisasi</span></li>
+                    <li><i class="bi bi-check" aria-hidden="true"></i><span>Konsultasi ke Posyandu atau Puskesmas</span></li>
+                </ul>
+            </article>
+        </div>
+
+        <article class="content-card contribution-card reveal">
+            <div class="contribution-heading">
+                <div><span class="card-overline">FAKTOR PENDUKUNG MODEL</span><h3>Kontribusi Fitur</h3><p>Visualisasi nilai relatif fitur berdasarkan Mutual Information pada penelitian.</p></div>
+                <span class="mi-badge"><i class="bi bi-bar-chart-line" aria-hidden="true"></i> Mutual Information</span>
+            </div>
+            <div class="feature-list">
+                {% for feature in contributions %}
+                <div class="feature-row">
+                    <span class="feature-rank">{{ '%02d'|format(loop.index) }}</span>
+                    <strong>{{ feature.name }}</strong>
+                    <div role="progressbar" aria-label="{{ feature.name }}" aria-valuenow="{{ feature.value }}" aria-valuemin="0" aria-valuemax="100"><i data-progress="{{ feature.value }}"></i></div>
+                    <span>{{ feature.value }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </article>
+
+        <div class="result-actions reveal">
+            <a class="btn btn-outline-brand btn-lg" href="{{ url_for('prediction') }}"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Skrining Lagi</a>
+            <a class="btn btn-brand btn-lg" href="{{ url_for('download_result') }}"><i class="bi bi-download" aria-hidden="true"></i> Unduh Hasil</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

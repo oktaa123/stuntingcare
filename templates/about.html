@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="page-shell about-page">
+    <div class="container">
+        <div class="about-intro reveal">
+            <div>
+                <span class="section-kicker">TENTANG STUNTINGCARE</span>
+                <h1>Mendampingi orang tua mengambil langkah lebih awal.</h1>
+                <p>StuntingCare dirancang untuk membantu orang tua melakukan skrining awal risiko stunting dengan proses yang mudah, hasil yang ramah, dan rekomendasi yang dapat dipahami.</p>
+                <div class="purpose-note"><i class="bi bi-heart-pulse-fill" aria-hidden="true"></i><span><strong>Tujuan aplikasi</strong>Mendukung kesadaran dan pemantauan tumbuh kembang anak—bukan menggantikan pemeriksaan tenaga kesehatan.</span></div>
+            </div>
+            <div class="about-illustration" aria-hidden="true">
+                <span class="about-ring"></span>
+                <i class="bi bi-people"></i>
+                <strong>Orang tua & anak</strong>
+                <small>Tumbuh bersama, melangkah lebih awal</small>
+            </div>
+        </div>
+
+        <article class="research-title-card reveal">
+            <span><i class="bi bi-journal-medical" aria-hidden="true"></i></span>
+            <div><small>JUDUL PENELITIAN</small><h2>StuntingCare — Sistem Prediksi Risiko Stunting Menggunakan Mutual Information, Random Forest, dan Optimasi Hyperparameter Optuna</h2></div>
+        </article>
+
+        <div class="identity-grid">
+            <article class="identity-card reveal"><span><i class="bi bi-person-badge" aria-hidden="true"></i></span><div><small>MAHASISWA</small><strong>Afan Arga Ahyana</strong><p>Peneliti dan pengembang StuntingCare</p></div></article>
+            <article class="identity-card reveal"><span><i class="bi bi-buildings" aria-hidden="true"></i></span><div><small>UNIVERSITAS</small><strong>Universitas Muhammadiyah Semarang</strong><p>Indonesia</p></div></article>
+        </div>
+
+        <section class="technology-section" aria-labelledby="technology-title">
+            <div class="section-heading reveal">
+                <span class="section-kicker">TEKNOLOGI</span>
+                <h2 id="technology-title">Teknologi yang digunakan.</h2>
+                <p>Aplikasi dan model penelitian dibangun menggunakan teknologi berikut.</p>
+            </div>
+            <div class="technology-grid">
+                {% set tech = [
+                    ('bi-filetype-py', 'Python', 'Bahasa pemrograman'),
+                    ('bi-window', 'Flask', 'Aplikasi web'),
+                    ('bi-cpu', 'Scikit-learn', 'Machine learning'),
+                    ('bi-bootstrap', 'Bootstrap 5', 'Antarmuka responsif'),
+                    ('bi-filter-circle', 'Mutual Information', 'Seleksi fitur'),
+                    ('bi-tree', 'Random Forest', 'Model klasifikasi'),
+                    ('bi-toggles', 'Optuna', 'Optimasi model')
+                ] %}
+                {% for icon, name, role in tech %}
+                <article class="technology-card reveal"><span><i class="bi {{ icon }}" aria-hidden="true"></i></span><strong>{{ name }}</strong><small>{{ role }}</small></article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <div class="about-disclaimer reveal"><i class="bi bi-shield-check" aria-hidden="true"></i><div><strong>Informasi kesehatan yang bertanggung jawab</strong><p>StuntingCare memberikan hasil skrining awal. Diagnosis dan rencana penanganan tetap perlu ditentukan oleh tenaga kesehatan berdasarkan pemeriksaan langsung.</p></div></div>
+    </div>
+</section>
+{% endblock %}

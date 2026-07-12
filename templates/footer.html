@@ -1,0 +1,28 @@
+<footer class="site-footer">
+    <div class="page-container footer-grid">
+        <div class="footer-about">
+            <a class="brand brand--light" href="{{ url_for('home') }}">
+                <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+                <span>Stunting<span>Care</span></span>
+            </a>
+            <p>Sistem pendamping skrining risiko stunting balita berbasis machine learning untuk deteksi dini yang lebih terarah.</p>
+        </div>
+        <div class="footer-links">
+            <strong>Navigasi</strong>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('prediksi') }}">Prediksi</a>
+            <a href="{{ url_for('informasi') }}">Metode</a>
+            <a href="{{ url_for('tentang') }}">Tentang</a>
+        </div>
+        <div class="footer-links">
+            <strong>Informasi</strong>
+            <span><i class="bi bi-mortarboard"></i> Informatika</span>
+            <span><i class="bi bi-building"></i> Universitas Muhammadiyah Semarang</span>
+            <span><i class="bi bi-geo-alt"></i> Semarang, Indonesia</span>
+        </div>
+    </div>
+    <div class="page-container footer-bottom">
+        <span>&copy; {{ current_year }} StuntingCare. All rights reserved.</span>
+        <span>Hasil skrining bukan pengganti diagnosis tenaga kesehatan.</span>
+    </div>
+</footer>

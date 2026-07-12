@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="about-hero page-hero">
+    <div class="page-container about-grid">
+        <div class="about-copy reveal">
+            <span class="eyebrow"><i class="bi bi-info-circle"></i> Tentang Penelitian</span>
+            <h1>Teknologi untuk tumbuh kembang yang <em>lebih baik.</em></h1>
+            <p>StuntingCare dikembangkan sebagai sistem pendamping deteksi awal risiko stunting pada balita melalui pendekatan machine learning yang terukur.</p>
+            <div class="about-purpose">
+                <span><i class="bi bi-bullseye"></i></span>
+                <div><strong>Tujuan Penelitian</strong><p>Membantu proses skrining awal menjadi lebih cepat, konsisten, dan mudah dipahami tanpa menggantikan pemeriksaan tenaga kesehatan.</p></div>
+            </div>
+        </div>
+        <div class="about-visual reveal reveal-delay">
+            <div class="about-image"><img src="{{ url_for('static', filename='img/mother-child-hero.png') }}" alt="Ibu mendampingi tumbuh kembang balita" width="700" height="700"></div>
+            <span class="about-badge"><i class="bi bi-heart-pulse-fill"></i> Untuk generasi sehat</span>
+        </div>
+    </div>
+</section>
+
+<section class="section-pad--small">
+    <div class="page-container about-info-grid">
+        <article class="research-card reveal">
+            <div class="panel-heading">
+                <div><span class="section-label">Informasi</span><h2>Profil Penelitian</h2></div>
+                <span class="method-card-icon"><i class="bi bi-mortarboard"></i></span>
+            </div>
+            <div class="research-list">
+                {% for item in research_identity %}
+                <div><span>{{ item.label }}</span><strong>{{ item.value }}</strong></div>
+                {% endfor %}
+            </div>
+        </article>
+
+        <article class="principle-card reveal">
+            <span class="section-label">Prinsip Sistem</span>
+            <h2>Dirancang dengan tanggung jawab</h2>
+            <div class="principle-list">
+                <div><span><i class="bi bi-shield-check"></i></span><div><strong>Pendamping keputusan</strong><p>Hasil digunakan sebagai skrining awal, bukan diagnosis akhir.</p></div></div>
+                <div><span><i class="bi bi-eye"></i></span><div><strong>Mudah diinterpretasi</strong><p>Probabilitas dan faktor input ditampilkan dengan bahasa yang jelas.</p></div></div>
+                <div><span><i class="bi bi-person-check"></i></span><div><strong>Berpusat pada pengguna</strong><p>Alur ringkas untuk mendukung pelayanan Posyandu dan Puskesmas.</p></div></div>
+            </div>
+        </article>
+    </div>
+</section>
+
+<section class="section-pad tech-section">
+    <div class="page-container">
+        <div class="section-heading section-heading--center reveal">
+            <span class="section-label">Teknologi yang Digunakan</span>
+            <h2>Dibangun dengan fondasi yang <em>andal</em></h2>
+        </div>
+        <div class="tech-grid">
+            <article class="tech-card reveal"><span class="tech-logo tech-logo--python"><i class="bi bi-filetype-py"></i></span><strong>Python</strong><small>Bahasa pemrograman</small></article>
+            <article class="tech-card reveal"><span class="tech-logo"><i class="bi bi-fire"></i></span><strong>Flask</strong><small>Web framework</small></article>
+            <article class="tech-card reveal"><span class="tech-logo tech-logo--green"><i class="bi bi-diagram-3"></i></span><strong>Scikit-learn</strong><small>Machine learning</small></article>
+            <article class="tech-card reveal"><span class="tech-logo tech-logo--purple"><i class="bi bi-bootstrap"></i></span><strong>Responsive UI</strong><small>Frontend modern</small></article>
+        </div>
+    </div>
+</section>
+
+<section class="section-pad section-pad--last">
+    <div class="page-container research-note reveal">
+        <span><i class="bi bi-quote"></i></span>
+        <blockquote>“Deteksi dini bukan tentang memberi label, tetapi membuka kesempatan untuk tindak lanjut yang lebih cepat dan tepat.”</blockquote>
+        <p>StuntingCare &mdash; Sistem Pendukung Skrining Balita</p>
+    </div>
+</section>
+{% endblock %}

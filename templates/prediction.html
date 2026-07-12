@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="page-shell prediction-page">
+    <div class="container">
+        <div class="page-heading reveal">
+            <span class="section-kicker">SKRINING RISIKO STUNTING</span>
+            <h1>Ceritakan sedikit tentang anak Anda.</h1>
+            <p>Isi data sesuai hasil pengukuran terbaru. Prosesnya singkat dan hasil akan ditampilkan setelah data dianalisis.</p>
+        </div>
+
+        <ol class="screening-steps reveal" aria-label="Tahapan skrining">
+            <li class="active" aria-current="step"><span>1</span><div><strong>Data Anak</strong><small>Lengkapi informasi</small></div></li>
+            <li class="step-line" aria-hidden="true"></li>
+            <li><span>2</span><div><strong>Analisis</strong><small>Proses data</small></div></li>
+            <li class="step-line" aria-hidden="true"></li>
+            <li><span>3</span><div><strong>Hasil</strong><small>Lihat rekomendasi</small></div></li>
+        </ol>
+
+        <form class="prediction-card reveal" method="post" data-prediction-form novalidate>
+            <div class="card-title-row">
+                <div class="title-icon"><i class="bi bi-person-heart" aria-hidden="true"></i></div>
+                <div><h2>Data Anak</h2><p>Kolom bertanda wajib perlu diisi sebelum analisis.</p></div>
+                <span><i class="bi bi-lock" aria-hidden="true"></i> Data hanya digunakan untuk skrining</span>
+            </div>
+
+            {% if errors %}
+            <div class="alert alert-soft-danger" role="alert" aria-live="polite">
+                <strong><i class="bi bi-info-circle" aria-hidden="true"></i> Ada data yang perlu diperiksa.</strong>
+                <ul class="mb-0 mt-2">{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+            </div>
+            {% endif %}
+
+            <fieldset>
+                <legend class="form-section-label"><span>01</span><div>Informasi dasar<small>Identitas dan usia anak</small></div></legend>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label" for="child_name">Nama Anak <span>*</span></label>
+                        <div class="input-wrap"><i class="bi bi-person" aria-hidden="true"></i><input class="form-control" id="child_name" name="child_name" value="{{ form_data.child_name }}" placeholder="Contoh: Aulia" autocomplete="name" required></div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="gender">Jenis Kelamin <span>*</span></label>
+                        <div class="input-wrap"><i class="bi bi-gender-ambiguous" aria-hidden="true"></i><select class="form-select" id="gender" name="gender" required><option value="">Pilih jenis kelamin</option><option {{ 'selected' if form_data.gender == 'Laki-laki' }}>Laki-laki</option><option {{ 'selected' if form_data.gender == 'Perempuan' }}>Perempuan</option></select></div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="age">Usia Anak <span>*</span></label>
+                        <div class="input-wrap has-unit"><i class="bi bi-calendar3" aria-hidden="true"></i><input class="form-control" id="age" name="age" type="number" min="0" max="60" step="1" inputmode="numeric" value="{{ form_data.age }}" placeholder="24" aria-describedby="age-help" required><span>bulan</span></div>
+                        <small class="field-help" id="age-help">Usia 0–60 bulan.</small>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-divider"></div>
+            <fieldset>
+                <legend class="form-section-label"><span>02</span><div>Data pertumbuhan<small>Gunakan hasil pengukuran terbaru</small></div></legend>
+                <div class="row g-4">
+                    {% set measurements = [
+                        ('birth_weight', 'Berat Badan Lahir', 'bi-speedometer2', 'gram', '3200', '500', '6000', 'Contoh: 3200 gram'),
+                        ('birth_length', 'Panjang Badan Lahir', 'bi-rulers', 'cm', '49', '30', '65', 'Contoh: 49 cm'),
+                        ('current_weight', 'Berat Badan Saat Ini', 'bi-speedometer', 'kg', '10.5', '1', '35', 'Gunakan hasil timbang terbaru'),
+                        ('current_height', 'Tinggi Badan Saat Ini', 'bi-arrows-vertical', 'cm', '82', '35', '130', 'Gunakan hasil ukur terbaru')
+                    ] %}
+                    {% for name, label, icon, unit, placeholder, minimum, maximum, help_text in measurements %}
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ name }}">{{ label }} <span>*</span></label>
+                        <div class="input-wrap has-unit"><i class="bi {{ icon }}" aria-hidden="true"></i><input class="form-control" id="{{ name }}" name="{{ name }}" type="number" min="{{ minimum }}" max="{{ maximum }}" step="0.1" inputmode="decimal" value="{{ form_data[name] }}" placeholder="{{ placeholder }}" aria-describedby="{{ name }}-help" required><span>{{ unit }}</span></div>
+                        <small class="field-help" id="{{ name }}-help">{{ help_text }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </fieldset>
+
+            <div class="form-divider"></div>
+            <fieldset>
+                <legend class="form-section-label"><span>03</span><div>Riwayat kesehatan<small>Informasi pendukung tumbuh kembang</small></div></legend>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <label class="form-label" for="exclusive_breastfeeding">ASI Eksklusif <span>*</span></label>
+                        <div class="input-wrap"><i class="bi bi-droplet" aria-hidden="true"></i><select class="form-select" id="exclusive_breastfeeding" name="exclusive_breastfeeding" required><option value="">Pilih jawaban</option><option {{ 'selected' if form_data.exclusive_breastfeeding == 'Ya' }}>Ya</option><option {{ 'selected' if form_data.exclusive_breastfeeding == 'Tidak' }}>Tidak</option></select></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="immunization_status">Status Imunisasi <span>*</span></label>
+                        <div class="input-wrap"><i class="bi bi-shield-check" aria-hidden="true"></i><select class="form-select" id="immunization_status" name="immunization_status" required><option value="">Pilih status</option><option {{ 'selected' if form_data.immunization_status == 'Lengkap' }}>Lengkap</option><option {{ 'selected' if form_data.immunization_status == 'Belum Lengkap' }}>Belum Lengkap</option></select></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="infection_history">Riwayat Penyakit Infeksi <span>*</span></label>
+                        <div class="input-wrap"><i class="bi bi-bandaid" aria-hidden="true"></i><select class="form-select" id="infection_history" name="infection_history" required><option value="">Pilih jawaban</option><option {{ 'selected' if form_data.infection_history == 'Ada' }}>Ada</option><option {{ 'selected' if form_data.infection_history == 'Tidak Ada' }}>Tidak Ada</option></select></div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-actions">
+                <p><i class="bi bi-shield-check" aria-hidden="true"></i> Hasil skrining bersifat pendamping dan bukan diagnosis medis.</p>
+                <button class="btn btn-brand btn-lg" type="submit"><span>Analisis Sekarang</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

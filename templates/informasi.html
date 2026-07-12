@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="page-hero method-hero">
+    <div class="page-container page-intro page-intro--center reveal">
+        <span class="eyebrow"><i class="bi bi-diagram-3"></i> Metodologi Penelitian</span>
+        <h1>Teknologi di balik <em>prediksi</em></h1>
+        <p>Alur metodologi yang digunakan dari pengolahan data, seleksi fitur, hingga evaluasi performa model.</p>
+    </div>
+</section>
+
+<section class="section-pad--small method-content">
+    <div class="page-container">
+        <div class="method-pipeline reveal">
+            {% set pipeline = [
+                ('bi-database', 'Dataset'),
+                ('bi-gear', 'Preprocessing'),
+                ('bi-bar-chart', 'Mutual Information'),
+                ('bi-ui-checks-grid', '8 Fitur Terpilih'),
+                ('bi-tree', 'Random Forest'),
+                ('bi-bullseye', 'Optimasi'),
+                ('bi-clipboard2-check', 'Evaluasi')
+            ] %}
+            {% for icon, label in pipeline %}
+            <div class="pipeline-step">
+                <span><i class="bi {{ icon }}"></i></span>
+                <strong>{{ label }}</strong>
+            </div>
+            {% if not loop.last %}<i class="bi bi-arrow-right pipeline-arrow"></i>{% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="method-explainer-grid section-pad--small">
+            <article class="method-card reveal">
+                <div class="method-card-icon"><i class="bi bi-bar-chart-steps"></i></div>
+                <span class="section-label">Seleksi Fitur</span>
+                <h2>Mutual Information</h2>
+                <p>Mengukur hubungan antara setiap fitur dan kelas target untuk menemukan indikator yang paling informatif.</p>
+                <ul class="check-list">
+                    {% for item in mutual_information_points %}<li><i class="bi bi-check2"></i>{{ item }}</li>{% endfor %}
+                </ul>
+                <div class="mini-chart" aria-label="Ilustrasi ranking fitur">
+                    {% for item in feature_rankings[:6] %}
+                    <span style="--bar: {{ item.weight }}%"><i></i><small>{{ loop.index }}</small></span>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="method-card reveal">
+                <div class="method-card-icon"><i class="bi bi-tree"></i></div>
+                <span class="section-label">Algoritma Klasifikasi</span>
+                <h2>Random Forest</h2>
+                <p>Ensemble banyak decision tree mengurangi overfitting dan menghasilkan keputusan yang lebih stabil.</p>
+                <div class="forest-visual">
+                    <span class="forest-root"><i class="bi bi-circle-fill"></i></span>
+                    <div>
+                        {% for i in range(3) %}
+                        <span><i class="bi bi-diagram-3"></i><small>Decision Tree {{ i + 1 }}</small></span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="model-tag"><i class="bi bi-layers"></i><span><strong>Ensemble Model</strong><small>Keputusan mayoritas dari banyak pohon</small></span></div>
+            </article>
+
+            <article class="method-card reveal">
+                <div class="method-card-icon method-card-icon--blue"><i class="bi bi-bullseye"></i></div>
+                <span class="section-label">Hyperparameter</span>
+                <h2>Optimasi Model</h2>
+                <p>Pencarian konfigurasi terbaik membantu model mencapai performa yang optimal dan konsisten.</p>
+                <div class="target-visual">
+                    <span><i class="bi bi-bullseye"></i></span>
+                    <strong>100</strong>
+                    <small>kombinasi percobaan</small>
+                </div>
+                <div class="model-tag model-tag--blue"><i class="bi bi-lightning-charge"></i><span><strong>Best Parameters</strong><small>Dipilih berdasarkan skor validasi</small></span></div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="evaluation-section section-pad">
+    <div class="page-container">
+        <div class="section-heading section-heading--center reveal">
+            <span class="section-label">Evaluasi Model</span>
+            <h2>Performa yang <em>terukur</em></h2>
+            <p>Ringkasan metrik evaluasi pada data penelitian.</p>
+        </div>
+        <div class="evaluation-grid">
+            {% set metrics = [('Accuracy', '92.86%'), ('ROC-AUC', '0.9017'), ('Precision', '0.93'), ('Recall', '0.91'), ('F1-Score', '0.92')] %}
+            {% for label, value in metrics %}
+            <article class="evaluation-card reveal"><small>{{ label }}</small><strong>{{ value }}</strong><span><i class="bi bi-arrow-up-right"></i> Performa model</span></article>
+            {% endfor %}
+        </div>
+
+        <div class="evaluation-detail-grid">
+            <article class="confusion-card reveal">
+                <span class="section-label">Confusion Matrix</span>
+                <h3>Distribusi klasifikasi</h3>
+                <div class="matrix">
+                    <span></span><small>Pred. Stunting</small><small>Pred. Normal</small>
+                    <small>Akt. Stunting</small><strong class="matrix-good">138</strong><strong class="matrix-soft">10</strong>
+                    <small>Akt. Normal</small><strong class="matrix-soft">16</strong><strong class="matrix-good">185</strong>
+                </div>
+            </article>
+            <article class="roc-card reveal">
+                <div><span class="section-label">ROC Curve</span><h3>Area Under Curve</h3></div>
+                <div class="roc-chart">
+                    <span class="axis-y">True Positive Rate</span>
+                    <span class="axis-x">False Positive Rate</span>
+                    <i class="roc-diagonal"></i>
+                    <svg viewBox="0 0 500 210" role="img" aria-label="Ilustrasi kurva ROC">
+                        <path d="M10 198 C35 80 90 45 175 24 C260 7 370 4 490 4" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+                    </svg>
+                    <strong>AUC = 0.9017</strong>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section-pad section-pad--last">
+    <div class="page-container cta-panel cta-panel--compact reveal">
+        <div><span class="eyebrow eyebrow--light"><i class="bi bi-stars"></i> Coba sistem</span><h2>Siap melihat model bekerja?</h2><p>Masukkan data balita dan dapatkan hasil prediksi dalam satu alur.</p></div>
+        <a class="btn btn-light btn-lg" href="{{ url_for('prediksi') }}">Mulai Prediksi <i class="bi bi-arrow-right"></i></a>
+    </div>
+</section>
+{% endblock %}

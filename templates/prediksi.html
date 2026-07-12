@@ -1,0 +1,283 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="page-hero page-hero--compact">
+    <div class="page-container">
+        <div class="page-intro reveal">
+            <span class="eyebrow"><i class="bi bi-clipboard2-pulse"></i> Skrining balita</span>
+            <h1>Prediksi Risiko <em>Stunting</em></h1>
+            <p>Lengkapi delapan indikator berikut sesuai hasil pengukuran dan informasi keluarga balita.</p>
+        </div>
+
+        <div class="stepper reveal" aria-label="Tahapan prediksi">
+            <div class="stepper-item is-active {% if result %}is-done{% endif %}">
+                <span>{% if result %}<i class="bi bi-check-lg"></i>{% else %}1{% endif %}</span>
+                <div><strong>Data Balita</strong><small>Lengkapi indikator</small></div>
+            </div>
+            <i class="stepper-line {% if result %}is-done{% endif %}"></i>
+            <div class="stepper-item {% if result %}is-done{% endif %}">
+                <span>{% if result %}<i class="bi bi-check-lg"></i>{% else %}2{% endif %}</span>
+                <div><strong>Prediksi</strong><small>Analisis model</small></div>
+            </div>
+            <i class="stepper-line {% if result %}is-done{% endif %}"></i>
+            <div class="stepper-item {% if result %}is-active{% endif %}">
+                <span>3</span>
+                <div><strong>Hasil</strong><small>Risiko & rekomendasi</small></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="prediction-section section-pad--small">
+    <div class="page-container">
+        <article class="form-panel reveal">
+            <div class="panel-heading">
+                <div>
+                    <span class="section-label">Form Data Balita</span>
+                    <h2>Masukkan data pengukuran</h2>
+                    <p>Pastikan data sesuai catatan pengukuran terbaru untuk hasil yang lebih relevan.</p>
+                </div>
+                <span class="secure-badge"><i class="bi bi-shield-check"></i> Data sesi aman</span>
+            </div>
+
+            {% if errors %}
+            <div class="alert-card alert-card--danger" role="alert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <div>
+                    <strong>Data belum dapat diproses</strong>
+                    <ul>
+                        {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="post" data-prediction-form>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label for="birth_weight"><span>01</span> BB Lahir <small>(gram)</small></label>
+                        <div class="control-wrap">
+                            <i class="bi bi-speedometer2"></i>
+                            <input id="birth_weight" name="birth_weight" type="number" min="500" max="6000" step="1" value="{{ form_data.birth_weight }}" placeholder="Contoh: 3200" required>
+                        </div>
+                        <small class="field-hint">Rentang input 500–6000 gram</small>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="bbu_status"><span>02</span> Status BB/U</label>
+                        <div class="control-wrap control-wrap--select">
+                            <i class="bi bi-bar-chart"></i>
+                            <select id="bbu_status" name="bbu_status" required>
+                                <option value="">Pilih status berat badan</option>
+                                {% for option in form_options.bbu_status %}
+                                <option value="{{ option.value }}" {% if form_data.bbu_status == option.value %}selected{% endif %}>{{ option.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="z_score_weight_height"><span>03</span> Z Score BB/TB</label>
+                        <div class="control-wrap">
+                            <i class="bi bi-rulers"></i>
+                            <input id="z_score_weight_height" name="z_score_weight_height" type="number" min="-6" max="6" step="0.01" value="{{ form_data.z_score_weight_height }}" placeholder="Contoh: -1.25" required>
+                        </div>
+                        <small class="field-hint">Nilai hasil pengukuran -6 sampai 6</small>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="has_jkn"><span>04</span> Kepemilikan JKN</label>
+                        <div class="control-wrap control-wrap--select">
+                            <i class="bi bi-card-checklist"></i>
+                            <select id="has_jkn" name="has_jkn" required>
+                                <option value="">Pilih status JKN</option>
+                                {% for option in form_options.has_jkn %}
+                                <option value="{{ option.value }}" {% if form_data.has_jkn == option.value %}selected{% endif %}>{{ option.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="age_days"><span>05</span> Umur Balita <small>(hari)</small></label>
+                        <div class="control-wrap">
+                            <i class="bi bi-calendar3"></i>
+                            <input id="age_days" name="age_days" type="number" min="0" max="1825" step="1" value="{{ form_data.age_days }}" placeholder="Contoh: 730" required>
+                        </div>
+                        <small class="field-hint">Maksimal 1825 hari / 5 tahun</small>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="posyandu_visit_history"><span>06</span> Riwayat Posyandu</label>
+                        <div class="control-wrap control-wrap--select">
+                            <i class="bi bi-hospital"></i>
+                            <select id="posyandu_visit_history" name="posyandu_visit_history" required>
+                                <option value="">Pilih riwayat kunjungan</option>
+                                {% for option in form_options.posyandu_visit_history %}
+                                <option value="{{ option.value }}" {% if form_data.posyandu_visit_history == option.value %}selected{% endif %}>{{ option.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="family_status"><span>07</span> Status Keluarga</label>
+                        <div class="control-wrap control-wrap--select">
+                            <i class="bi bi-house-heart"></i>
+                            <select id="family_status" name="family_status" required>
+                                <option value="">Pilih status keluarga</option>
+                                {% for option in form_options.family_status %}
+                                <option value="{{ option.value }}" {% if form_data.family_status == option.value %}selected{% endif %}>{{ option.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="kb_status"><span>08</span> Status KB</label>
+                        <div class="control-wrap control-wrap--select">
+                            <i class="bi bi-people"></i>
+                            <select id="kb_status" name="kb_status" required>
+                                <option value="">Pilih status KB</option>
+                                {% for option in form_options.kb_status %}
+                                <option value="{{ option.value }}" {% if form_data.kb_status == option.value %}selected{% endif %}>{{ option.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-footer">
+                    <p><i class="bi bi-info-circle"></i> Hasil merupakan skrining awal dan bukan diagnosis medis.</p>
+                    <div>
+                        <a class="btn btn-secondary" href="{{ url_for('prediksi', clear=1) }}"><i class="bi bi-arrow-counterclockwise"></i> Reset</a>
+                        <button class="btn btn-primary btn-submit" type="submit">
+                            <span>Prediksi Risiko Stunting</span><i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </article>
+    </div>
+</section>
+
+{% if result %}
+<section class="result-section section-pad" id="hasil">
+    <div class="page-container">
+        <div class="section-heading reveal">
+            <span class="section-label">Hasil Prediksi</span>
+            <h2>Ringkasan skrining terakhir</h2>
+            <p>Ditampilkan berdasarkan data yang baru saja Anda masukkan.</p>
+        </div>
+
+        <div class="result-layout">
+            <article class="result-main result-main--{{ result.status_variant }} reveal">
+                <div class="result-status">
+                    <span class="result-status-icon"><i class="bi {{ result.status_icon }}"></i></span>
+                    <div>
+                        <small>HASIL KLASIFIKASI</small>
+                        <h3>{{ result.classification_text }}</h3>
+                        <span>{{ result.status_text }}</span>
+                    </div>
+                </div>
+
+                <div class="probability-display">
+                    <div class="probability-ring" style="--value: {{ result.probability_percent }}%;">
+                        <div><strong>{{ result.probability_percent }}%</strong><span>Probabilitas</span></div>
+                    </div>
+                    <div class="probability-copy">
+                        <span class="section-label">Interpretasi</span>
+                        <h3>{{ result.status_text }}</h3>
+                        <p>{{ result.status_summary }}</p>
+                        <small><i class="bi bi-clock"></i> {{ result.recorded_at }}</small>
+                    </div>
+                </div>
+
+                <div class="dual-progress">
+                    <div>
+                        <span><b>Stunting</b><strong>{{ result.probability_percent }}%</strong></span>
+                        <i><em class="bar-danger" data-progress="{{ result.probability_percent }}"></em></i>
+                    </div>
+                    <div>
+                        <span><b>Non-Stunting</b><strong>{{ 100 - result.probability_percent }}%</strong></span>
+                        <i><em class="bar-success" data-progress="{{ 100 - result.probability_percent }}"></em></i>
+                    </div>
+                </div>
+            </article>
+
+            <div class="result-side">
+                <article class="recommendation-card reveal">
+                    <div class="card-title-row">
+                        <span><i class="bi bi-clipboard2-heart"></i></span>
+                        <div><small>Langkah berikutnya</small><h3>Rekomendasi</h3></div>
+                    </div>
+                    <ul>
+                        {% for recommendation in result.recommendations %}
+                        <li><i class="bi bi-check-circle-fill"></i>{{ recommendation }}</li>
+                        {% endfor %}
+                    </ul>
+                </article>
+                <div class="result-actions reveal">
+                    <a class="btn btn-secondary" href="{{ url_for('prediksi', clear=1) }}"><i class="bi bi-arrow-repeat"></i> Prediksi Lagi</a>
+                    <button class="btn btn-primary" type="button" data-print-result><i class="bi bi-download"></i> Simpan Hasil</button>
+                </div>
+            </div>
+        </div>
+
+        <article class="factor-panel reveal">
+            <div class="panel-heading">
+                <div><span class="section-label">Analisis Input</span><h2>Ringkasan indikator balita</h2></div>
+                <span class="secure-badge"><i class="bi bi-info-circle"></i> Interpretasi berbasis input</span>
+            </div>
+            <div class="factor-grid">
+                {% for factor in result.factor_explanations %}
+                <div class="factor-item">
+                    <div>
+                        <span>{{ factor.label }}</span>
+                        <strong>{{ factor.value }}</strong>
+                    </div>
+                    <span class="impact impact--{{ factor.impact_class }}">{{ factor.impact_label }}</span>
+                    <p>{{ factor.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </article>
+
+        {% if result.source == "fallback" %}
+        <div class="model-notice reveal"><i class="bi bi-info-circle-fill"></i><span><strong>Mode prototipe aktif.</strong> File model Random Forest belum tersedia, sehingga hasil dihitung dengan mesin estimasi lokal.</span></div>
+        {% endif %}
+    </div>
+</section>
+{% else %}
+<section class="prediction-help section-pad--small">
+    <div class="page-container help-strip reveal">
+        <span><i class="bi bi-shield-check"></i></span>
+        <div><strong>Belum ada hasil prediksi</strong><p>Lengkapi form di atas. Hasil risiko, probabilitas, dan rekomendasi akan tampil di halaman ini.</p></div>
+        <i class="bi bi-arrow-up-right"></i>
+    </div>
+</section>
+{% endif %}
+
+{% if history %}
+<section class="section-pad--small history-section">
+    <div class="page-container">
+        <article class="history-panel reveal">
+            <div class="panel-heading">
+                <div><span class="section-label">Riwayat Sesi</span><h2>Prediksi terbaru</h2><p>Maksimal delapan hasil selama sesi browser ini.</p></div>
+                <span class="history-count">{{ history|length }} data</span>
+            </div>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>Waktu</th><th>Hasil</th><th>Status</th><th>Probabilitas</th><th>BB Lahir</th><th>Umur</th></tr></thead>
+                    <tbody>
+                        {% for item in history %}
+                        <tr><td>{{ item.recorded_at }}</td><td><strong>{{ item.classification }}</strong></td><td>{{ item.status }}</td><td>{{ item.probability_percent }}%</td><td>{{ item.birth_weight }}</td><td>{{ item.age_days }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

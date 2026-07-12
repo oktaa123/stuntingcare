@@ -1,0 +1,25 @@
+<header class="site-header">
+    <div class="nav-wrap page-container">
+        <a class="brand" href="{{ url_for('home') }}" aria-label="StuntingCare - Beranda">
+            <span class="brand-mark" aria-hidden="true">
+                <i class="bi bi-heart-pulse-fill"></i>
+            </span>
+            <span>Stunting<span>Care</span></span>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-controls="mainNavigation" aria-expanded="false" aria-label="Buka navigasi">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <nav class="main-nav" id="mainNavigation" aria-label="Navigasi utama">
+            <a class="nav-link {% if request.endpoint == 'home' %}is-active{% endif %}" href="{{ url_for('home') }}">Home</a>
+            <a class="nav-link {% if request.endpoint == 'prediksi' %}is-active{% endif %}" href="{{ url_for('prediksi') }}">Prediksi</a>
+            <a class="nav-link {% if request.endpoint == 'informasi' %}is-active{% endif %}" href="{{ url_for('informasi') }}">Metode</a>
+            <a class="nav-link {% if request.endpoint == 'tentang' %}is-active{% endif %}" href="{{ url_for('tentang') }}">Tentang</a>
+        </nav>
+
+        <a class="btn btn-primary nav-cta" href="{{ url_for('prediksi') }}">
+            Mulai Prediksi <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</header>

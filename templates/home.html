@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container hero-grid">
+        <div class="hero-copy reveal">
+            <span class="eyebrow"><i class="bi bi-heart-pulse" aria-hidden="true"></i> Pendamping tumbuh kembang anak</span>
+            <h1>Pantau Risiko Stunting Anak <span>Secara Mudah dan Cepat</span></h1>
+            <p>StuntingCare membantu orang tua melakukan skrining awal risiko stunting menggunakan teknologi Machine Learning berbasis Mutual Information, Random Forest, dan Optuna.</p>
+            <div class="hero-actions">
+                <a class="btn btn-brand btn-lg" href="{{ url_for('prediction') }}">Mulai Skrining <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                <a class="text-action" href="{{ url_for('method') }}">Pelajari Metode <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+            </div>
+            <div class="trust-row" aria-label="Keunggulan StuntingCare">
+                <span><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Mudah digunakan</span>
+                <span><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Berbasis penelitian</span>
+                <span><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Hasil mudah dipahami</span>
+            </div>
+        </div>
+        <div class="hero-visual reveal reveal-delay">
+            <div class="visual-blob" aria-hidden="true"></div>
+            <img src="{{ url_for('static', filename='img/mother-child-hero.png') }}" alt="Ilustrasi ibu bersama anak balitanya" width="900" height="900">
+            <div class="floating-note note-top"><span><i class="bi bi-shield-check" aria-hidden="true"></i></span><div><strong>Skrining awal</strong><small>Tenang dan mudah</small></div></div>
+            <div class="floating-note note-bottom"><span><i class="bi bi-emoji-smile" aria-hidden="true"></i></span><div><strong>Untuk orang tua</strong><small>Mendukung langkah selanjutnya</small></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="section-space importance-section" aria-labelledby="importance-title">
+    <div class="container">
+        <div class="section-heading reveal">
+            <span class="section-kicker">MANFAAT SKRINING</span>
+            <h2 id="importance-title">Mengapa Skrining Sejak Dini Penting?</h2>
+            <p>Langkah kecil hari ini dapat membantu mendukung tumbuh kembang anak dengan lebih baik.</p>
+        </div>
+        <div class="row g-4">
+            {% set benefits = [
+                ('bi-search-heart', 'Deteksi Lebih Awal', 'Mengenali kemungkinan risiko lebih dini agar orang tua dapat merencanakan tindak lanjut yang sesuai.'),
+                ('bi-graph-up-arrow', 'Mendukung Tumbuh Kembang', 'Membantu orang tua lebih peka terhadap pertumbuhan dan kebutuhan gizi anak dari waktu ke waktu.'),
+                ('bi-people', 'Membantu Orang Tua Mengambil Keputusan', 'Menyajikan informasi awal yang jelas sebagai bahan konsultasi dengan tenaga kesehatan.')
+            ] %}
+            {% for icon, title, description in benefits %}
+            <div class="col-md-4">
+                <article class="benefit-card reveal">
+                    <span><i class="bi {{ icon }}" aria-hidden="true"></i></span>
+                    <i class="bi bi-check-circle-fill benefit-check" aria-hidden="true"></i>
+                    <h3>{{ title }}</h3>
+                    <p>{{ description }}</p>
+                </article>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section-space workflow-section" aria-labelledby="workflow-title">
+    <div class="container">
+        <div class="section-heading reveal">
+            <span class="section-kicker">CARA KERJA SISTEM</span>
+            <h2 id="workflow-title">Skrining dalam empat langkah sederhana.</h2>
+            <p>Ikuti alur yang singkat untuk memperoleh informasi awal mengenai risiko stunting anak.</p>
+        </div>
+        <div class="parent-workflow reveal">
+            {% set steps = [
+                ('bi-clipboard2-heart', 'Isi Data Anak', 'Masukkan data dasar dan pertumbuhan anak.'),
+                ('bi-stars', 'Analisis Data', 'Sistem memproses data dengan model penelitian.'),
+                ('bi-clipboard2-check', 'Hasil Skrining', 'Lihat tingkat risiko dalam bahasa yang sederhana.'),
+                ('bi-heart-pulse', 'Rekomendasi', 'Ikuti saran tindak lanjut yang ditampilkan.')
+            ] %}
+            {% for icon, title, description in steps %}
+            <article class="workflow-step">
+                <span class="workflow-number">{{ '%02d'|format(loop.index) }}</span>
+                <div class="workflow-icon"><i class="bi {{ icon }}" aria-hidden="true"></i></div>
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+            </article>
+            {% if not loop.last %}<i class="bi bi-arrow-right workflow-arrow" aria-hidden="true"></i>{% endif %}
+            {% endfor %}
+        </div>
+        <p class="workflow-note reveal"><i class="bi bi-info-circle" aria-hidden="true"></i> Model dibangun menggunakan Mutual Information, Random Forest, dan Optimasi Hyperparameter Optuna.</p>
+    </div>
+</section>
+
+<section class="section-space research-summary" aria-labelledby="research-title">
+    <div class="container">
+        <div class="section-heading reveal">
+            <span class="section-kicker">RINGKASAN PENELITIAN</span>
+            <h2 id="research-title">Dikembangkan dengan hasil yang terukur.</h2>
+            <p>Ringkasan performa model berdasarkan penelitian StuntingCare.</p>
+        </div>
+        <div class="row g-3">
+            {% set stats = [
+                ('bi-bullseye', 'Accuracy', '92.86%', 'Akurasi model'),
+                ('bi-graph-up-arrow', 'ROC-AUC', '0.9017', 'Kemampuan klasifikasi'),
+                ('bi-ui-checks-grid', 'Selected Features', '8', 'Fitur terpilih'),
+                ('bi-database-check', 'Dataset', '349 Data', 'Data penelitian')
+            ] %}
+            {% for icon, label, value, detail in stats %}
+            <div class="col-6 col-lg-3">
+                <article class="stat-card reveal">
+                    <span class="stat-icon"><i class="bi {{ icon }}" aria-hidden="true"></i></span>
+                    <small>{{ label }}</small><strong>{{ value }}</strong><p>{{ detail }}</p>
+                </article>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

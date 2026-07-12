@@ -1,3 +1,8 @@
+import joblib
+import numpy as np
+app = Flask(__name__)
+
+model = joblib.load("model/random_forest_model.joblib")
 from __future__ import annotations
 
 from datetime import datetime

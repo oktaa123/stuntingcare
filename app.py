@@ -9,6 +9,8 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
+model = joblib.load("model/random_forest_model.joblib")
+
 FEATURE_CONTRIBUTIONS = [
     {"name": "Berat Badan Lahir", "value": 100},
     {"name": "Panjang Badan Lahir", "value": 91},

@@ -1,7 +1,18 @@
-venv/
+# Python
 __pycache__/
 *.pyc
-.env
+
+# Flask logs
+.flask-run*
+.flask-server*
+
+# Environment
+.venv/
+venv/
+
+# VS Code
 .vscode/
-.idea/
-#*.joblib
+
+# OS
+.DS_Store
+Thumbs.db

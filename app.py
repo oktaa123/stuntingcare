@@ -12,14 +12,14 @@ app.config.from_object(Config)
 model = joblib.load("model/random_forest_model.joblib")
 
 FEATURE_CONTRIBUTIONS = [
-    {"name": "Berat Badan Lahir", "value": 100},
-    {"name": "Panjang Badan Lahir", "value": 91},
-    {"name": "Berat Badan Saat Ini", "value": 83},
-    {"name": "Riwayat Penyakit Infeksi", "value": 74},
-    {"name": "Usia", "value": 64},
-    {"name": "ASI Eksklusif", "value": 56},
-    {"name": "Tinggi Badan Saat Ini", "value": 48},
-    {"name": "Status Imunisasi", "value": 40},
+    {"name": "BB/U", "value": 100},
+    {"name": "Z Score BB/TB", "value": 95},
+    {"name": "MEROKOK", "value": 90},
+    {"name": "KEPEMILKAN JKN", "value": 85},
+    {"name": "RIWAYAT DATANG POSYANDU", "value": 80},
+    {"name": "BB Lahir (gram)", "value": 75},
+    {"name": "STATUS KELIARGA", "value": 70},
+    {"name": "POLA ASUH", "value": 65},
 ]
 
 FORM_FIELDS = (

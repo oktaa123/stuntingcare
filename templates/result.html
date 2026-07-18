@@ -20,7 +20,7 @@
         <article class="result-summary {{ 'needs-attention' if result.positive else 'low-risk' }} reveal" aria-labelledby="screening-status">
             <div class="result-copy">
                 <span class="result-badge"><i class="bi {{ 'bi-heart-pulse' if result.positive else 'bi-shield-check' }}" aria-hidden="true"></i> {{ 'Tindak lanjut disarankan' if result.positive else 'Pertumbuhan tetap dipantau' }}</span>
-                <h2 id="screening-status">{{ 'Risiko Stunting' if result.positive else 'Risiko Rendah' }}</h2>
+                <h2 id="screening-status" data-testid="result-classification" data-positive="{{ 'true' if result.positive else 'false' }}" data-classification="{{ result.classification }}">{{ 'Risiko Stunting' if result.positive else 'Risiko Rendah' }}</h2>
                 <p>
                     {% if result.positive %}
                     Hasil menunjukkan adanya kemungkinan risiko stunting yang memerlukan perhatian. Tetap tenang—hasil ini dapat menjadi langkah awal untuk berkonsultasi dan memperoleh pendampingan yang tepat.
@@ -30,7 +30,7 @@
                 </p>
             </div>
             <div class="result-score" aria-label="Probabilitas risiko {{ result.probability }} persen">
-                <div class="score-number"><strong>{{ result.probability }}%</strong><span>Probabilitas risiko</span></div>
+                <div class="score-number" data-testid="result-probability" data-probability="{{ result.probability }}"><strong>{{ result.probability }}%</strong><span>Probabilitas risiko</span></div>
                 <div class="probability-track" role="progressbar" aria-valuenow="{{ result.probability }}" aria-valuemin="0" aria-valuemax="100" aria-label="Probabilitas risiko">
                     <i style="width: {{ result.probability }}%"></i>
                 </div>
@@ -50,41 +50,46 @@
                 </p>
                 <div class="disclaimer" role="note">
                     <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
-                    <span>Hasil ini merupakan skrining awal menggunakan model machine learning dan bukan diagnosis medis. Untuk memastikan kondisi anak, konsultasikan dengan tenaga kesehatan.</span>
+                    {% if result.source == 'model' %}
+                    <span>Hasil ini merupakan skrining awal menggunakan model machine learning (Random Forest) dan bukan diagnosis medis. Untuk memastikan kondisi anak, konsultasikan dengan tenaga kesehatan.</span>
+                    {% else %}
+                    <span>Hasil ini merupakan skrining awal berbasis aturan (model belum aktif) dan bukan diagnosis medis. Untuk memastikan kondisi anak, konsultasikan dengan tenaga kesehatan.</span>
+                    {% endif %}
                 </div>
             </article>
 
             <article class="content-card recommendation-card reveal">
                 <div class="content-card-heading"><span><i class="bi bi-clipboard2-heart" aria-hidden="true"></i></span><div><small>REKOMENDASI</small><h3>Langkah baik selanjutnya</h3></div></div>
                 <ul>
-                    <li><i class="bi bi-check" aria-hidden="true"></i><span>Pantau pertumbuhan rutin</span></li>
-                    <li><i class="bi bi-check" aria-hidden="true"></i><span>Perbaiki asupan gizi</span></li>
-                    <li><i class="bi bi-check" aria-hidden="true"></i><span>Lengkapi imunisasi</span></li>
-                    <li><i class="bi bi-check" aria-hidden="true"></i><span>Konsultasi ke Posyandu atau Puskesmas</span></li>
+                    {% for item in result.recommendations %}
+                    <li><i class="bi bi-check" aria-hidden="true"></i><span>{{ item }}</span></li>
+                    {% endfor %}
                 </ul>
             </article>
         </div>
 
+        {% if contributions %}
         <article class="content-card contribution-card reveal">
             <div class="contribution-heading">
-                <div><span class="card-overline">FAKTOR PENDUKUNG MODEL</span><h3>Kontribusi Fitur</h3><p>Visualisasi nilai relatif fitur berdasarkan Mutual Information pada penelitian.</p></div>
-                <span class="mi-badge"><i class="bi bi-bar-chart-line" aria-hidden="true"></i> Mutual Information</span>
+                <div><span class="card-overline">KONTRIBUSI FITUR MODEL</span><h3>Faktor Paling Berpengaruh</h3><p>Feature importance dari model Random Forest — gambaran umum model, <strong>bukan skor personal anak ini</strong>.</p></div>
+                <span class="mi-badge"><i class="bi bi-bar-chart-line" aria-hidden="true"></i> Random Forest</span>
             </div>
             <div class="feature-list">
                 {% for feature in contributions %}
                 <div class="feature-row">
                     <span class="feature-rank">{{ '%02d'|format(loop.index) }}</span>
                     <strong>{{ feature.name }}</strong>
-                    <div role="progressbar" aria-label="{{ feature.name }}" aria-valuenow="{{ feature.value }}" aria-valuemin="0" aria-valuemax="100"><i data-progress="{{ feature.value }}"></i></div>
-                    <span>{{ feature.value }}%</span>
+                    <div role="progressbar" aria-label="{{ feature.name }}" aria-valuenow="{{ feature.importance_pct }}" aria-valuemin="0" aria-valuemax="100"><i data-progress="{{ feature.value }}"></i></div>
+                    <span>{{ feature.importance_pct }}%</span>
                 </div>
                 {% endfor %}
             </div>
         </article>
+        {% endif %}
 
         <div class="result-actions reveal">
-            <a class="btn btn-outline-brand btn-lg" href="{{ url_for('prediction') }}"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Skrining Lagi</a>
-            <a class="btn btn-brand btn-lg" href="{{ url_for('download_result') }}"><i class="bi bi-download" aria-hidden="true"></i> Unduh Hasil</a>
+            <a class="btn btn-outline-brand btn-lg" href="{{ url_for('prediction') }}" data-testid="restart"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Skrining Lagi</a>
+            <a class="btn btn-brand btn-lg" href="{{ url_for('download_result') }}" data-testid="download-result"><i class="bi bi-download" aria-hidden="true"></i> Unduh Hasil</a>
         </div>
     </div>
 </section>

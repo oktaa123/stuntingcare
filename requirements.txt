@@ -1,6 +1,12 @@
+# Runtime dependencies. These versions install on Python 3.12–3.14.
+#
+# NOTE ON MODEL SKEW: model/random_forest_model.joblib was pickled with
+# scikit-learn 1.6.1. It still unpickles under 1.9.0 (with an
+# InconsistentVersionWarning). For a production deploy, retrain the model on the
+# pinned scikit-learn version or pin scikit-learn to the training version.
 Flask==3.0.3
-numpy==2.0.2
-pandas==2.2.3
-scikit-learn==1.5.2
-joblib==1.4.2
+numpy==2.5.1
+pandas==3.0.3
+scikit-learn==1.9.0
+joblib==1.5.3
 gunicorn==23.0.0

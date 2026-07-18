@@ -1,33 +1,100 @@
-def predict_risk(data: dict[str, str]) -> dict:
-    features = np.array([[
-        float(data["bbu"]),
-        float(data["zscore"]),
-        int(data["merokok"]),
-        int(data["jkn"]),
-        int(data["riwayat_posyandu"]),
-        float(data["birth_weight"]),
-        int(data["status_keluarga"]),
-        int(data["pola_asuh"])
-    ]])
+{% extends "layout.html" %}
 
-    prediction = model.predict(features)[0]
-    probability = model.predict_proba(features)[0]
+{% block content %}
+<section class="page-shell prediction-page">
+    <div class="container">
+        <div class="page-heading reveal">
+            <span class="section-kicker">SKRINING RISIKO STUNTING</span>
+            <h1>Ceritakan sedikit tentang anak Anda.</h1>
+            <p>Isi data sesuai hasil pengukuran terbaru dari Posyandu atau fasilitas kesehatan. Hasil ditampilkan setelah data dianalisis oleh model.</p>
+        </div>
 
-    prob = round(max(probability) * 100)
+        <ol class="screening-steps reveal" aria-label="Tahapan skrining">
+            <li class="active" aria-current="step"><span>1</span><div><strong>Data Anak</strong><small>Lengkapi informasi</small></div></li>
+            <li class="step-line" aria-hidden="true"></li>
+            <li><span>2</span><div><strong>Analisis</strong><small>Proses data</small></div></li>
+            <li class="step-line" aria-hidden="true"></li>
+            <li><span>3</span><div><strong>Hasil</strong><small>Lihat rekomendasi</small></div></li>
+        </ol>
 
-    positive = prediction == 1
+        <form class="prediction-card reveal" method="post" data-prediction-form novalidate>
+            <div class="card-title-row">
+                <div class="title-icon"><i class="bi bi-person-heart" aria-hidden="true"></i></div>
+                <div><h2>Data Anak</h2><p>Semua kolom wajib diisi sebelum analisis.</p></div>
+                <span><i class="bi bi-lock" aria-hidden="true"></i> Data hanya digunakan untuk skrining</span>
+            </div>
 
-    return {
-        "positive": positive,
-        "classification": "STUNTING" if positive else "TIDAK STUNTING",
-        "risk_level": "High Risk" if positive else "Low Risk",
-        "probability": prob,
-        "interpretation": (
-            "Balita memiliki risiko stunting. Disarankan melakukan pemeriksaan lebih lanjut di Posyandu atau Puskesmas."
-            if positive else
-            "Balita memiliki risiko stunting yang rendah. Tetap lakukan pemantauan pertumbuhan secara rutin."
-        ),
-        "recorded_at": datetime.now().strftime("%d %B %Y, %H:%M"),
-        "child_name": data["child_name"],
-        "inputs": data,
-    }
+            {% if errors %}
+            <div class="alert alert-soft-danger" role="alert" aria-live="polite" data-testid="form-errors">
+                <strong><i class="bi bi-info-circle" aria-hidden="true"></i> Ada data yang perlu diperiksa.</strong>
+                <ul class="mb-0 mt-2">{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+            </div>
+            {% endif %}
+
+            <fieldset>
+                <legend class="form-section-label"><span>01</span><div>Identitas<small>Nama balita</small></div></legend>
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <label class="form-label" for="child_name">Nama Anak <span>*</span></label>
+                        <div class="input-wrap"><i class="bi bi-person" aria-hidden="true"></i><input class="form-control" id="child_name" name="child_name" value="{{ form_data.child_name }}" placeholder="Contoh: Aulia" autocomplete="name" required></div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-divider"></div>
+            <fieldset>
+                <legend class="form-section-label"><span>02</span><div>Antropometri<small>Nilai Z-score dari KMS / hasil pengukuran</small></div></legend>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label" for="bb_u">BB/U (Z-score) <span>*</span></label>
+                        <div class="input-wrap"><i class="bi bi-graph-down" aria-hidden="true"></i><input class="form-control" id="bb_u" name="bb_u" type="number" min="-6" max="6" step="0.01" inputmode="decimal" value="{{ form_data.bb_u }}" placeholder="Contoh: -1.5" aria-describedby="bb_u-help" required></div>
+                        <small class="field-help" id="bb_u-help">Z-score berat badan menurut umur. Nilai &lt; -2 = berat kurang.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="z_score">Z-Score BB/TB <span>*</span></label>
+                        <div class="input-wrap"><i class="bi bi-rulers" aria-hidden="true"></i><input class="form-control" id="z_score" name="z_score" type="number" min="-6" max="6" step="0.01" inputmode="decimal" value="{{ form_data.z_score }}" placeholder="Contoh: -0.8" aria-describedby="z_score-help" required></div>
+                        <small class="field-help" id="z_score-help">Z-score berat badan menurut tinggi badan.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="birth_weight">{{ binary_fields.birth_weight.label }} <span>*</span></label>
+                        <div class="input-wrap"><i class="bi bi-speedometer2" aria-hidden="true"></i>
+                            <select class="form-select" id="birth_weight" name="birth_weight" required>
+                                <option value="">Pilih kategori</option>
+                                {% for option in binary_fields.birth_weight.options %}
+                                <option value="{{ option.value }}" {{ 'selected' if form_data.birth_weight == option.value }}>{{ option.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-divider"></div>
+            <fieldset>
+                <legend class="form-section-label"><span>03</span><div>Sosial &amp; Perilaku<small>Kondisi keluarga dan pengasuhan</small></div></legend>
+                <div class="row g-4">
+                    {% for field in ['merokok', 'jkn', 'riwayat_posyandu', 'status_keluarga', 'pola_asuh'] %}
+                    {% set meta = binary_fields[field] %}
+                    <div class="col-md-4">
+                        <label class="form-label" for="{{ field }}">{{ meta.label }} <span>*</span></label>
+                        <div class="input-wrap"><i class="bi bi-ui-checks" aria-hidden="true"></i>
+                            <select class="form-select" id="{{ field }}" name="{{ field }}" required>
+                                <option value="">Pilih jawaban</option>
+                                {% for option in meta.options %}
+                                <option value="{{ option.value }}" {{ 'selected' if form_data[field] == option.value }}>{{ option.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </fieldset>
+
+            <div class="form-actions">
+                <p><i class="bi bi-shield-check" aria-hidden="true"></i> Hasil skrining bersifat pendamping dan bukan diagnosis medis.</p>
+                <button class="btn btn-brand btn-lg" type="submit"><span>Analisis Sekarang</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

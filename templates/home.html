@@ -6,7 +6,7 @@
         <div class="hero-copy reveal">
             <span class="eyebrow"><i class="bi bi-heart-pulse" aria-hidden="true"></i> Pendamping tumbuh kembang anak</span>
             <h1>Pantau Risiko Stunting Anak <span>Secara Mudah dan Cepat</span></h1>
-            <p>StuntingCare membantu orang tua melakukan skrining awal risiko stunting menggunakan teknologi Machine Learning berbasis Mutual Information, Random Forest, dan Optuna.</p>
+            <p>StuntingCare membantu orang tua dan kader melakukan skrining awal pertumbuhan balita dengan alur yang singkat, hasil yang jelas, dan rekomendasi tindak lanjut yang mudah dipahami.</p>
             <div class="hero-actions">
                 <a class="btn btn-brand btn-lg" href="{{ url_for('prediction') }}">Mulai Skrining <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                 <a class="text-action" href="{{ url_for('method') }}">Pelajari Metode <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
@@ -63,7 +63,7 @@
         <div class="parent-workflow reveal">
             {% set steps = [
                 ('bi-clipboard2-heart', 'Isi Data Anak', 'Masukkan data dasar dan pertumbuhan anak.'),
-                ('bi-stars', 'Analisis Data', 'Sistem memproses data dengan model penelitian.'),
+                ('bi-activity', 'Proses Skrining', 'Sistem memeriksa data pertumbuhan dan kondisi balita.'),
                 ('bi-clipboard2-check', 'Hasil Skrining', 'Lihat tingkat risiko dalam bahasa yang sederhana.'),
                 ('bi-heart-pulse', 'Rekomendasi', 'Ikuti saran tindak lanjut yang ditampilkan.')
             ] %}
@@ -77,7 +77,7 @@
             {% if not loop.last %}<i class="bi bi-arrow-right workflow-arrow" aria-hidden="true"></i>{% endif %}
             {% endfor %}
         </div>
-        <p class="workflow-note reveal"><i class="bi bi-info-circle" aria-hidden="true"></i> Model dibangun menggunakan Mutual Information, Random Forest, dan Optimasi Hyperparameter Optuna.</p>
+        <p class="workflow-note reveal"><i class="bi bi-info-circle" aria-hidden="true"></i> Hasil skrining merupakan alat bantu awal dan bukan diagnosis medis.</p>
     </div>
 </section>
 

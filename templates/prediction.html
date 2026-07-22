@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<section class="page-shell prediction-page">
+<section class="page-shell prediction-page page-enter">
     <div class="container">
         <div class="page-heading reveal">
             <span class="section-kicker">SKRINING RISIKO STUNTING</span>
             <h1>Ceritakan sedikit tentang anak Anda.</h1>
-            <p>Isi data sesuai hasil pengukuran terbaru dari Posyandu atau fasilitas kesehatan. Hasil ditampilkan setelah data dianalisis oleh model.</p>
+            <p>Isi data sesuai hasil pengukuran terbaru dari Posyandu atau fasilitas kesehatan. Hasil akan ditampilkan setelah proses skrining selesai.</p>
         </div>
 
         <ol class="screening-steps reveal" aria-label="Tahapan skrining">
@@ -17,7 +17,7 @@
             <li><span>3</span><div><strong>Hasil</strong><small>Lihat rekomendasi</small></div></li>
         </ol>
 
-        <form class="prediction-card reveal" method="post" data-prediction-form novalidate>
+        <form class="prediction-card reveal" method="post" data-prediction-form autocomplete="off" novalidate>
             <div class="card-title-row">
                 <div class="title-icon"><i class="bi bi-person-heart" aria-hidden="true"></i></div>
                 <div><h2>Data Anak</h2><p>Semua kolom wajib diisi sebelum analisis.</p></div>
@@ -92,7 +92,10 @@
 
             <div class="form-actions">
                 <p><i class="bi bi-shield-check" aria-hidden="true"></i> Hasil skrining bersifat pendamping dan bukan diagnosis medis.</p>
-                <button class="btn btn-brand btn-lg" type="submit"><span>Analisis Sekarang</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                <button class="btn btn-brand btn-lg" type="submit" data-analysis-button>
+                    <span data-button-label>Analisis Sekarang</span>
+                    <i class="bi bi-arrow-right" data-button-icon aria-hidden="true"></i>
+                </button>
             </div>
         </form>
     </div>

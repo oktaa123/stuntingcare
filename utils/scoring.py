@@ -5,13 +5,18 @@ It was trained on a pandas DataFrame with 8 columns, so column NAMES and ORDER
 both matter — they are reproduced verbatim in ``MODEL_FEATURES`` below (including
 the original typos in the training data's headers).
 
+The matching training notebook (``final_rf_=_tuning_.ipynb``) defines
+``Target = np.where(TB/U < -3, 1, 0)`` and labels the confusion-matrix class
+order as ``["Stunting", "Severely"]``. Therefore the trained target mapping is
+0 = STUNTING and 1 = SEVERELY STUNTING.
+
 Probing the model shows:
   * ``BB/U`` and ``Z Score BB/TB`` are continuous z-scores (together ~85% of the
     model's importance).
   * the other 6 features were binary {0, 1} in training — including
     ``BB Lahir (gram)``, which was binarized (0 = low birth weight) rather than
     fed as raw grams, despite its name.
-  * classes_ = [0, 1]; class 1 = stunting.
+  * classes_ = [0, 1], matching the notebook target mapping above.
 """
 from __future__ import annotations
 
@@ -31,7 +36,11 @@ MODEL_FEATURES: list[str] = [
     "POLA ASUH",
 ]
 
-POSITIVE_CLASS = 1  # 1 = stunting
+MODEL_CLASS_LABELS = {
+    0: "STUNTING",
+    1: "SEVERELY STUNTING",
+}
+SEVERE_CLASS = 1
 
 # Human-friendly labels for the UI (the raw column names carry typos).
 DISPLAY_NAMES = {
@@ -66,18 +75,37 @@ def load_model(model_path: str):
     return model
 
 
-def predict_probability(features: dict[str, float], model) -> float:
-    """P(stunting) from the model, using its exact column names + order.
+def predict_class_and_probability(features: dict[str, float], model) -> tuple[int, float]:
+    """Return ``model.predict`` and the probability of that predicted class.
 
-    ``features`` must be keyed by the MODEL_FEATURES column names.
+    The category is always sourced from ``model.predict``. ``predict_proba`` is
+    only used to obtain the display percentage for that same class.
     """
     import pandas as pd
 
     frame = pd.DataFrame([[features[name] for name in MODEL_FEATURES]], columns=MODEL_FEATURES)
-    proba = model.predict_proba(frame)[0]
-    classes = list(model.classes_)
-    index = classes.index(POSITIVE_CLASS) if POSITIVE_CLASS in classes else len(classes) - 1
-    return float(proba[index])
+    prediction = model.predict(frame)[0]
+    prediction = int(prediction.item() if hasattr(prediction, "item") else prediction)
+    classes = [int(value.item() if hasattr(value, "item") else value) for value in model.classes_]
+    if set(classes) != set(MODEL_CLASS_LABELS):
+        raise ValueError(
+            f"Model classes {classes!r} do not match the verified label mapping "
+            f"{sorted(MODEL_CLASS_LABELS)!r}."
+        )
+    if prediction not in classes:
+        raise ValueError(f"Predicted class {prediction!r} is absent from model.classes_.")
+    probability = float(model.predict_proba(frame)[0][classes.index(prediction)])
+    if not 0.0 <= probability <= 1.0:
+        raise ValueError(f"Model returned invalid probability {probability!r}.")
+    return prediction, probability
+
+
+def classification_for_prediction(prediction: int) -> str:
+    """Map a numeric training target to its verified human-readable label."""
+    try:
+        return MODEL_CLASS_LABELS[int(prediction)]
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError(f"No verified label mapping for model class {prediction!r}.") from error
 
 
 def feature_contributions(model, limit: int | None = None) -> list[dict]:
@@ -100,33 +128,3 @@ def feature_contributions(model, limit: int | None = None) -> list[dict]:
         }
         for name, importance in pairs
     ]
-
-
-def rule_based_probability(features: dict[str, float]) -> float:
-    """Transparent fallback used only when the model file is missing.
-
-    Clinical convention: lower weight-for-age / weight-for-height z-scores mean
-    higher stunting risk.
-    """
-    score = 0.05
-    bb_u = features["BB/U"]
-    z_bb_tb = features["Z Score BB/TB"]
-
-    if bb_u < -3:
-        score += 0.55
-    elif bb_u < -2:
-        score += 0.35
-    elif bb_u < -1:
-        score += 0.12
-
-    if z_bb_tb < -3:
-        score += 0.25
-    elif z_bb_tb < -2:
-        score += 0.15
-
-    if features["BB Lahir (gram)"] == 0:  # 0 = low birth weight
-        score += 0.08
-    if features["RIWAYAT DATANG POSYANDU"] == 1:  # 1 = not routine
-        score += 0.05
-
-    return max(0.02, min(0.98, score))

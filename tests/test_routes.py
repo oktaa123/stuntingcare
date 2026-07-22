@@ -1,10 +1,7 @@
-"""End-to-end route tests driving the app through Flask's test client.
-
-Covers every route and state: static pages, legacy 301 redirects, both branches
-of validation, both session states for /result and the download, the exact
-download body under a frozen clock, and the model vs rule-based source flag.
-"""
+"""End-to-end checks for screening, reports, reset state, and validation."""
 from __future__ import annotations
+
+from time import perf_counter
 
 import pytest
 
@@ -55,41 +52,41 @@ def test_post_valid_redirects_to_result_and_sets_session(client):
     assert b'data-testid="result-classification"' in result_page.data
 
 
-def test_high_risk_payload_renders_stunting(client):
+def test_class_one_payload_renders_severely_stunting(client):
     client.post("/prediction", data=VALID_HIGH_RISK)
     page = client.get("/result")
-    assert b'data-classification="STUNTING"' in page.data
+    assert b'data-classification="SEVERELY STUNTING"' in page.data
     assert b'data-positive="true"' in page.data
 
 
-def test_low_risk_payload_renders_tidak_stunting(client):
+def test_class_zero_payload_renders_stunting(client):
     client.post("/prediction", data=VALID_LOW_RISK)
     page = client.get("/result")
-    assert b'data-classification="TIDAK STUNTING"' in page.data
+    assert b'data-classification="STUNTING"' in page.data
     assert b'data-positive="false"' in page.data
 
 
-def test_result_uses_model_source_disclaimer(client):
+def test_result_uses_health_language_without_technical_terms(client):
     client.post("/prediction", data=VALID_LOW_RISK)
     page = client.get("/result").data.decode()
-    assert "model machine learning (Random Forest)" in page
+    assert "bukan diagnosis medis" in page
+    assert "Probabilitas Prediksi" in page
+    assert "Machine Learning" not in page
+    assert "Random Forest" not in page
+    assert ">AI<" not in page
 
 
-def test_result_shows_real_importance_card(client):
+def test_result_shows_only_factors_matching_the_submission(client):
     client.post("/prediction", data=VALID_HIGH_RISK)
     page = client.get("/result").data.decode()
-    assert "Faktor Paling Berpengaruh" in page
-    assert "Z-Score BB/TB" in page  # top feature by importance
-
-
-# --- Rule-based fallback (model missing) ----------------------------------------
-
-def test_fallback_source_when_model_missing(no_model_client):
-    no_model_client.post("/prediction", data=VALID_HIGH_RISK)
-    page = no_model_client.get("/result").data.decode()
-    assert "berbasis aturan (model belum aktif)" in page
-    # No importance card without a model.
-    assert "Faktor Paling Berpengaruh" not in page
+    assert "Faktor yang Mempengaruhi Hasil Skrining" in page
+    assert "Berat Badan Lahir" in page
+    assert "Paparan Asap Rokok" in page
+    assert "Kepemilikan JKN" in page
+    assert "Kunjungan Posyandu" in page
+    assert "Pola Asuh" in page
+    # This input has a normal BB/TB z-score, so that factor must stay hidden.
+    assert "Nilai Z-Score BB/TB" not in page
 
 
 # --- Validation failures ---------------------------------------------------------
@@ -147,16 +144,68 @@ def test_download_without_session_redirects_to_form(client):
     assert resp.headers["Location"].endswith("/prediction")
 
 
-def test_download_report_body_is_deterministic(client):
+def test_download_is_a_print_ready_a4_pdf(client):
     client.post("/prediction", data=VALID_HIGH_RISK)
     resp = client.get("/result/download")
     assert resp.status_code == 200
-    assert resp.mimetype == "text/plain"
-    assert resp.headers["Content-Disposition"] == "attachment; filename=stuntingcare-result.txt"
-    body = resp.data.decode()
-    assert "Nama Balita : Budi" in body
-    assert "Hasil       : STUNTING" in body
-    assert "12 July 2026, 10:30" in body  # frozen clock
+    assert resp.mimetype == "application/pdf"
+    assert resp.headers["Content-Disposition"] == (
+        'attachment; filename="SCR-20260712-0001-hasil-skrining.pdf"'
+    )
+    assert resp.data.startswith(b"%PDF-")
+    assert b"/MediaBox [ 0 0 595.2756 841.8898 ]" in resp.data
+    assert len(resp.data) > 10_000
+
+
+def test_report_numbers_increment_for_repeated_screenings(client):
+    client.post("/prediction", data=VALID_HIGH_RISK)
+    with client.session_transaction() as screening_session:
+        assert screening_session["prediction_result"]["report_number"] == "SCR-20260712-0001"
+
+    client.get("/prediction")
+    client.post("/prediction", data=VALID_LOW_RISK)
+    with client.session_transaction() as screening_session:
+        assert screening_session["prediction_result"]["report_number"] == "SCR-20260712-0002"
+
+
+def test_screening_again_clears_result_session_and_form(client):
+    client.post("/prediction", data=VALID_HIGH_RISK)
+    form_page = client.get("/prediction")
+    assert form_page.status_code == 200
+    assert b'value="Budi"' not in form_page.data
+    with client.session_transaction() as screening_session:
+        assert "prediction_result" not in screening_session
+    assert client.get("/result").headers["Location"].endswith("/prediction")
+
+
+def test_dynamic_screening_pages_disable_browser_cache(client):
+    response = client.get("/prediction")
+    assert response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
+    assert response.headers["Pragma"] == "no-cache"
+
+
+def test_healthy_inputs_do_not_show_unrelated_factors_or_actions(client):
+    client.post("/prediction", data=VALID_LOW_RISK)
+    page = client.get("/result").data.decode()
+    assert "Tidak ada faktor khusus yang perlu ditampilkan" in page
+    assert "Balita terpapar asap rokok" not in page
+    assert "Kunjungan pemantauan pertumbuhan ke Posyandu belum rutin" not in page
+    assert "Jadikan rumah dan area bermain" not in page
+    assert "Susun jadwal kunjungan Posyandu" not in page
+
+
+def test_prediction_reuses_in_memory_model_and_completes_under_one_second(client, monkeypatch):
+    monkeypatch.setattr("app.scoring.load_model", lambda _path: pytest.fail(
+        "Model tidak boleh dimuat ulang saat prediksi"
+    ))
+    durations = []
+    for index in range(3):
+        payload = {**VALID_HIGH_RISK, "child_name": f"Budi {index}"}
+        started = perf_counter()
+        response = client.post("/prediction", data=payload)
+        durations.append(perf_counter() - started)
+        assert response.status_code == 302
+    assert max(durations) < 1.0
 
 
 def test_session_does_not_carry_raw_inputs(client):

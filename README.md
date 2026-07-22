@@ -9,10 +9,10 @@ Dibangun dengan **Flask** (server-rendered Jinja) + **scikit-learn**.
 
 ## Fitur
 
-- Form skrining 8 fitur → prediksi model (`STUNTING` / `TIDAK STUNTING` + probabilitas).
+- Form skrining 8 fitur → prediksi model (`STUNTING` / `SEVERELY STUNTING` + probabilitas).
 - Halaman hasil: interpretasi, rekomendasi, dan **feature importance asli** dari model.
 - Unduh hasil sebagai berkas teks.
-- Fallback berbasis aturan otomatis bila berkas model tidak ada (ditandai jelas di UI).
+- Prediksi hanya dijalankan dengan artefak Random Forest; aplikasi tidak membuat kategori pengganti secara hardcode.
 
 ## Struktur
 
@@ -20,10 +20,10 @@ Dibangun dengan **Flask** (server-rendered Jinja) + **scikit-learn**.
 |------|-----|
 | `app.py` | Factory `create_app`, route, validasi form, wiring model |
 | `config.py` | Konfigurasi (secret dari env, path model) |
-| `utils/scoring.py` | Load model, prediksi (P stunting), feature importance, fallback |
+| `utils/scoring.py` | Load model, prediksi kelas, probabilitas kelas hasil, feature importance |
 | `templates/` | Halaman Jinja (`layout` = base) |
 | `model/random_forest_model.joblib` | Artefak model terlatih — lihat `model/README.md` |
-| `tests/` | Suite pytest (route + scoring + fallback) |
+| `tests/` | Suite pytest untuk route, scoring, mapping label, dan konsistensi model |
 
 ## Menjalankan (lokal)
 

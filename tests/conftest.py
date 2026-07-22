@@ -2,8 +2,7 @@
 
 Each test builds an isolated app from the factory with a test config and a
 frozen clock, so redirects, session state, and the download report body are
-deterministic. ``client`` uses the real trained model; ``no_model_client``
-points at a missing artifact to exercise the rule-based fallback.
+deterministic. ``client`` uses the real trained model.
 """
 from __future__ import annotations
 
@@ -14,7 +13,7 @@ import pytest
 from app import create_app
 from config import Config
 
-# Frozen clock -> recorded_at renders as "12 July 2026, 10:30".
+# Frozen clock -> recorded_at renders as "12 Juli 2026, 10.30".
 FIXED_NOW = datetime(2026, 7, 12, 10, 30, 0)
 
 
@@ -24,11 +23,7 @@ class TestingConfig(Config):
     SECRET_KEY = "test-secret-key"
 
 
-class NoModelConfig(TestingConfig):
-    MODEL_PATH = "/nonexistent/no_model.joblib"
-
-
-# A clearly underweight child -> high risk (STUNTING).
+# This vector is predicted as training target 1 (SEVERELY STUNTING).
 VALID_HIGH_RISK = {
     "child_name": "Budi",
     "bb_u": "-3.5",
@@ -41,7 +36,7 @@ VALID_HIGH_RISK = {
     "pola_asuh": "1",
 }
 
-# A healthy child -> low risk (TIDAK STUNTING).
+# This vector is predicted as training target 0 (STUNTING).
 VALID_LOW_RISK = {
     "child_name": "Aulia",
     "bb_u": "0.5",
@@ -65,10 +60,3 @@ def app():
 @pytest.fixture
 def client(app):
     return app.test_client()
-
-
-@pytest.fixture
-def no_model_client():
-    application = create_app(NoModelConfig)
-    application.config["CLOCK"] = lambda: FIXED_NOW
-    return application.test_client()

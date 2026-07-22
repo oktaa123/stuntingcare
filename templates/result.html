@@ -1,65 +1,103 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<section class="page-shell result-page">
+{% set is_severe = result.classification == 'SEVERELY STUNTING' %}
+{% set status_class = 'is-severe' if is_severe else 'is-stunting' %}
+{% set impact_classes = {
+    'Sangat Tinggi': 'impact-critical',
+    'Tinggi': 'impact-high',
+    'Sedang': 'impact-medium',
+    'Rendah': 'impact-low'
+} %}
+
+<section class="page-shell result-page page-enter">
     <div class="container">
         <ol class="screening-steps result-stepper reveal" aria-label="Tahapan skrining">
             <li class="complete"><span><i class="bi bi-check" aria-hidden="true"></i></span><div><strong>Data Anak</strong><small>Sudah lengkap</small></div></li>
             <li class="step-line complete" aria-hidden="true"></li>
             <li class="complete"><span><i class="bi bi-check" aria-hidden="true"></i></span><div><strong>Analisis</strong><small>Sudah diproses</small></div></li>
             <li class="step-line complete" aria-hidden="true"></li>
-            <li class="active" aria-current="step"><span>3</span><div><strong>Hasil</strong><small>Rekomendasi Anda</small></div></li>
+            <li class="active" aria-current="step"><span>3</span><div><strong>Hasil</strong><small>Rekomendasi personal</small></div></li>
         </ol>
 
-        <div class="result-heading reveal">
+        <header class="result-heading reveal">
             <span class="section-kicker">HASIL SKRINING</span>
-            <h1>Hasil skrining awal {{ result.child_name }}</h1>
-            <p>Data telah dianalisis pada {{ result.recorded_at }}.</p>
-        </div>
+            <h1>Ringkasan pertumbuhan {{ result.child_name }}</h1>
+            <div class="report-meta" aria-label="Informasi laporan">
+                <span><i class="bi bi-file-earmark-medical" aria-hidden="true"></i>{{ result.report_number }}</span>
+                <span><i class="bi bi-calendar3" aria-hidden="true"></i>{{ result.recorded_at }}</span>
+            </div>
+        </header>
 
-        <article class="result-summary {{ 'needs-attention' if result.positive else 'low-risk' }} reveal" aria-labelledby="screening-status">
+        <article class="result-summary {{ status_class }} reveal" aria-labelledby="screening-status">
             <div class="result-copy">
-                <span class="result-badge"><i class="bi {{ 'bi-heart-pulse' if result.positive else 'bi-shield-check' }}" aria-hidden="true"></i> {{ 'Tindak lanjut disarankan' if result.positive else 'Pertumbuhan tetap dipantau' }}</span>
-                <h2 id="screening-status" data-testid="result-classification" data-positive="{{ 'true' if result.positive else 'false' }}" data-classification="{{ result.classification }}">{{ 'Risiko Stunting' if result.positive else 'Risiko Rendah' }}</h2>
-                <p>
-                    {% if result.positive %}
-                    Hasil menunjukkan adanya kemungkinan risiko stunting yang memerlukan perhatian. Tetap tenang—hasil ini dapat menjadi langkah awal untuk berkonsultasi dan memperoleh pendampingan yang tepat.
-                    {% else %}
-                    Hasil menunjukkan kemungkinan risiko stunting yang rendah. Pertahankan kebiasaan baik dan lanjutkan pemantauan pertumbuhan anak secara rutin.
-                    {% endif %}
-                </p>
+                <span class="result-badge"><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i>Kategori Pertumbuhan Balita</span>
+                <h2 id="screening-status" data-testid="result-classification" data-positive="{{ 'true' if result.positive else 'false' }}" data-classification="{{ result.classification }}">
+                    <span class="category-badge">{{ result.classification }}</span>
+                </h2>
+                <p>Hasil ini menggambarkan kategori skrining awal berdasarkan data pertumbuhan dan kondisi balita yang dimasukkan.</p>
             </div>
-            <div class="result-score" aria-label="Probabilitas risiko {{ result.probability }} persen">
-                <div class="score-number" data-testid="result-probability" data-probability="{{ result.probability }}"><strong>{{ result.probability }}%</strong><span>Probabilitas risiko</span></div>
-                <div class="probability-track" role="progressbar" aria-valuenow="{{ result.probability }}" aria-valuemin="0" aria-valuemax="100" aria-label="Probabilitas risiko">
-                    <i style="width: {{ result.probability }}%"></i>
+
+            <div class="result-score" aria-label="Probabilitas prediksi {{ result.probability }} persen">
+                <div class="score-number" data-testid="result-probability" data-probability="{{ result.probability }}">
+                    <span>Probabilitas Prediksi</span>
+                    <strong>{{ result.probability }}%</strong>
                 </div>
-                <div class="probability-labels"><span>Rendah</span><span>Memerlukan perhatian</span></div>
+                <div class="probability-track" role="progressbar" aria-valuenow="{{ result.probability }}" aria-valuemin="0" aria-valuemax="100" aria-label="Probabilitas prediksi">
+                    <i style="--probability: {{ result.probability }}%"></i>
+                </div>
+                <p>Probabilitas untuk kategori pertumbuhan yang ditampilkan.</p>
             </div>
+        </article>
+
+        <article class="content-card factor-card reveal">
+            <div class="contribution-heading">
+                <div>
+                    <span class="card-overline">FAKTOR YANG PERLU DIPERHATIKAN</span>
+                    <h3>Faktor yang Mempengaruhi Hasil Skrining</h3>
+                    <p>Daftar ini hanya memuat kondisi yang sesuai dengan data balita.</p>
+                </div>
+            </div>
+
+            {% if result.reasons %}
+            <ul class="factor-list">
+                {% for reason in result.reasons %}
+                <li>
+                    <span class="factor-number" aria-hidden="true">{{ "%02d"|format(loop.index) }}</span>
+                    <span class="factor-copy">
+                        <strong>{{ reason.factor }}</strong>
+                        <small>{{ reason.description }}</small>
+                    </span>
+                    <span class="impact-badge {{ impact_classes.get(reason.impact, 'impact-default') }}">{{ reason.impact }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="factor-empty">
+                <i class="bi bi-check-circle" aria-hidden="true"></i>
+                <span><strong>Tidak ada faktor khusus yang perlu ditampilkan.</strong><small>Data yang dimasukkan tidak memenuhi kondisi perhatian yang digunakan pada ringkasan ini.</small></span>
+            </div>
+            {% endif %}
         </article>
 
         <div class="result-grid">
             <article class="content-card interpretation-card reveal">
-                <div class="content-card-heading"><span><i class="bi bi-chat-heart" aria-hidden="true"></i></span><div><small>INTERPRETASI</small><h3>Apa arti hasil ini?</h3></div></div>
-                <p>
-                    {% if result.positive %}
-                    Beberapa data pertumbuhan dan riwayat kesehatan anak menunjukkan pola yang berkaitan dengan risiko stunting. Hasil ini bukan kepastian bahwa anak mengalami stunting, tetapi pemeriksaan lebih lanjut oleh tenaga kesehatan disarankan.
-                    {% else %}
-                    Data yang dimasukkan menunjukkan pola pertumbuhan dengan risiko stunting yang lebih rendah. Pemantauan rutin tetap penting karena tumbuh kembang anak dapat berubah dari waktu ke waktu.
-                    {% endif %}
-                </p>
+                <div class="content-card-heading">
+                    <span><i class="bi bi-chat-heart" aria-hidden="true"></i></span>
+                    <div><small>INTERPRETASI</small><h3>Makna hasil skrining</h3></div>
+                </div>
+                <p>{{ result.interpretation }}</p>
                 <div class="disclaimer" role="note">
                     <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
-                    {% if result.source == 'model' %}
-                    <span>Hasil ini merupakan skrining awal menggunakan model machine learning (Random Forest) dan bukan diagnosis medis. Untuk memastikan kondisi anak, konsultasikan dengan tenaga kesehatan.</span>
-                    {% else %}
-                    <span>Hasil ini merupakan skrining awal berbasis aturan (model belum aktif) dan bukan diagnosis medis. Untuk memastikan kondisi anak, konsultasikan dengan tenaga kesehatan.</span>
-                    {% endif %}
+                    <span>Hasil skrining ini merupakan alat bantu awal dan bukan diagnosis medis. Pemeriksaan lanjutan oleh tenaga kesehatan tetap diperlukan.</span>
                 </div>
             </article>
 
             <article class="content-card recommendation-card reveal">
-                <div class="content-card-heading"><span><i class="bi bi-clipboard2-heart" aria-hidden="true"></i></span><div><small>REKOMENDASI</small><h3>Langkah baik selanjutnya</h3></div></div>
+                <div class="content-card-heading">
+                    <span><i class="bi bi-clipboard2-heart" aria-hidden="true"></i></span>
+                    <div><small>REKOMENDASI</small><h3>Tindak lanjut personal</h3></div>
+                </div>
                 <ul>
                     {% for item in result.recommendations %}
                     <li><i class="bi bi-check" aria-hidden="true"></i><span>{{ item }}</span></li>
@@ -68,28 +106,13 @@
             </article>
         </div>
 
-        {% if contributions %}
-        <article class="content-card contribution-card reveal">
-            <div class="contribution-heading">
-                <div><span class="card-overline">KONTRIBUSI FITUR MODEL</span><h3>Faktor Paling Berpengaruh</h3><p>Feature importance dari model Random Forest — gambaran umum model, <strong>bukan skor personal anak ini</strong>.</p></div>
-                <span class="mi-badge"><i class="bi bi-bar-chart-line" aria-hidden="true"></i> Random Forest</span>
-            </div>
-            <div class="feature-list">
-                {% for feature in contributions %}
-                <div class="feature-row">
-                    <span class="feature-rank">{{ '%02d'|format(loop.index) }}</span>
-                    <strong>{{ feature.name }}</strong>
-                    <div role="progressbar" aria-label="{{ feature.name }}" aria-valuenow="{{ feature.importance_pct }}" aria-valuemin="0" aria-valuemax="100"><i data-progress="{{ feature.value }}"></i></div>
-                    <span>{{ feature.importance_pct }}%</span>
-                </div>
-                {% endfor %}
-            </div>
-        </article>
-        {% endif %}
-
         <div class="result-actions reveal">
-            <a class="btn btn-outline-brand btn-lg" href="{{ url_for('prediction') }}" data-testid="restart"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Skrining Lagi</a>
-            <a class="btn btn-brand btn-lg" href="{{ url_for('download_result') }}" data-testid="download-result"><i class="bi bi-download" aria-hidden="true"></i> Unduh Hasil</a>
+            <a class="btn btn-outline-brand btn-lg" href="{{ url_for('prediction') }}" data-testid="restart">
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span>Skrining Lagi</span>
+            </a>
+            <a class="btn btn-brand btn-lg" href="{{ url_for('download_result') }}" data-testid="download-result" data-pdf-download>
+                <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span>Unduh PDF</span>
+            </a>
         </div>
     </div>
 </section>
